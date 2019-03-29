@@ -329,21 +329,28 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @param beanName the name of the bean
 	 * @param cacheKey the cache key for metadata access
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
+	 * 查找是否在前面的范围内，在，则生成代理对象，替换原bean
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+	    //已经生产的做了缓存
 		if (beanName != null && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+		//未被切到的，直接返回
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
+        // 1.Advice/Advisor/AopInfrastructureBean接口的beanClass不进行代理
+        // 2.对beanName为aop内的切面名也不进行代理，此处可查看子类复写的sholdSkip()方法
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
 
 		// Create proxy if we have advice.
+        //如果在切面范围内，则创建proxy-bean
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		// DO_NOT_PROXY 为 	Object[] =null，估计只是为了类型保持一致，null其实用什么类型接受都一样
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
 			Object proxy = createProxy(
