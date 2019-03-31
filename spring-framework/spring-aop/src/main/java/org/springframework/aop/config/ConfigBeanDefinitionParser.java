@@ -107,12 +107,15 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		for (Element elt: childElts) {
 			String localName = parserContext.getDelegate().getLocalName(elt);
 			if (POINTCUT.equals(localName)) {
+			    // 生成了 AspectJExpressionPointcut 的BeanDefinition
 				parsePointcut(elt, parserContext);
-			}
+            }
 			else if (ADVISOR.equals(localName)) {
-				parseAdvisor(elt, parserContext);
-			}
+                //生成了 DefaultBeanFactoryPointcutAdvisor 的BeanDefinition
+                parseAdvisor(elt, parserContext);
+            }
 			else if (ASPECT.equals(localName)) {
+			    //生成了 AspectJPointcutAdvisor 的BeanDefinition
 				parseAspect(elt, parserContext);
 			}
 		}
@@ -329,10 +332,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			aspectFactoryDef.getPropertyValues().add("aspectBeanName", aspectName);
 			aspectFactoryDef.setSynthetic(true);
 
-			// register the pointcut
 			AbstractBeanDefinition adviceDef = createAdviceDefinition(
 					adviceElement, parserContext, aspectName, order, methodDefinition, aspectFactoryDef,
 					beanDefinitions, beanReferences);
+			// register the pointcut
 
 			// configure the advisor
 			RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);

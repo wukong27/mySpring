@@ -151,7 +151,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				compositeDef.addNestedComponent(new BeanComponentDefinition(processorDefinition));
 			}
 		}
-
+		//将注解需要的默认容器，传递给用户自定义的类；这里的传递对象是EmptyReaderEventListener,不做操作
 		readerContext.fireComponentRegistered(compositeDef);
 	}
 

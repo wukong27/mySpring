@@ -28,10 +28,10 @@
     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 
+    <context:component-scan base-package="org.springframework.service"></context:component-scan>
+
     <!-- 开启aspectj切面支持 -->
     <aop:aspectj-autoproxy proxy-target-class="true" />
-
-    <context:component-scan base-package="org.springframework.service"></context:component-scan>
 
     <bean  name="transactionManager"
            class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -42,8 +42,9 @@
     <aop:config>
         <!--问题权限切面检查-->
         <aop:aspect order="2" ref="permissionAspect">
-            <aop:around method="execute" pointcut="execution( * org.springframework.service.service.*(..) )"/>
-        </aop:aspect>
+        <aop:around method="execute" pointcut="execution( * org.springframework.service.service.*(..) )"/>
+    </aop:aspect>
+        <!--<aop:advisor advice-ref="permissionAspect" id="advisor"></aop:advisor>-->
     </aop:config>
 
     <bean id="messageService" class="org.springframework.demo.MessageServiceImple"/>

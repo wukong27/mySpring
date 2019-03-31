@@ -112,6 +112,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	/**
 	 * Register each bean definition within the given root {@code <beans/>} element.
+	 * 从根节点开始，解析配置文件，将所有节点解析为beanDefinition，然后注册到 beanFactory中
 	 */
 	protected void doRegisterBeanDefinitions(Element root) {
 		// Any nested <beans> elements will cause recursion in this method. In
@@ -139,6 +140,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		preProcessXml(root);
+		// 解析文档
 		parseBeanDefinitions(root, this.delegate);
 		postProcessXml(root);
 
@@ -170,13 +172,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						parseDefaultElement(ele, delegate);
 					}
 					else {
-						delegate.parseCustomElement(ele);
+                        //解析 bean标签意外的其他标签，比如 aop，context,mvc 标签
+                        delegate.parseCustomElement(ele);
 					}
 				}
 			}
 		}
 		else {
-			//解析 bean标签意外的其他标签，比如 aop，context,mvc 标签
 			delegate.parseCustomElement(root);
 		}
 	}
