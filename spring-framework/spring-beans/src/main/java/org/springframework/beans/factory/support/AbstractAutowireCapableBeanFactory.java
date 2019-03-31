@@ -404,6 +404,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			//postProcessBeforeInitialization，使用bean做相应的处理，返回null，及终止；再调用没有意义
 			result = processor.postProcessBeforeInitialization(result, beanName);
 			if (result == null) {
 				return result;
@@ -418,6 +419,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			//使用bean做相应的处理，返回null，及终止；再调用没有意义
 			result = processor.postProcessAfterInitialization(result, beanName);
 			if (result == null) {
 				return result;
@@ -548,8 +550,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
+			//属性填充
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
+				//是否
 				exposedObject = initializeBean(beanName, exposedObject, mbd);
 			}
 		}
@@ -1588,6 +1592,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
+	 *  初始化给定的bean实例，应用工厂回调,需要生产代理的bean，在这个过程中，被替换为 proxy-bean
 	 * Initialize the given bean instance, applying factory callbacks
 	 * as well as init methods and bean post processors.
 	 * <p>Called from {@link #createBean} for traditionally defined beans,
@@ -1620,6 +1625,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			//初始化之前，bean的后置处理器调用，继承了BeanPostProcessor 接口的bean；前置处理
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
@@ -1632,6 +1638,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			// 初始化之后，bean的后置处理器调用，继承了BeanPostProcessor 接口的bean；后置处理
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 		return wrappedBean;
