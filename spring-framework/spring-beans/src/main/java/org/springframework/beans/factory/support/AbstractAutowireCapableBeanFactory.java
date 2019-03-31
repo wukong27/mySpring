@@ -413,6 +413,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+    /**
+     * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessAfterInitialization(result, beanName)
+     * @param existingBean the new bean instance
+     * @param beanName the name of the bean
+     * @return
+     * @throws BeansException
+     */
 	@Override
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
@@ -553,7 +560,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//属性填充
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
-				//是否
+				//是否可以转换为 proxy-bean
 				exposedObject = initializeBean(beanName, exposedObject, mbd);
 			}
 		}
@@ -570,6 +577,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (earlySingletonExposure) {
 			Object earlySingletonReference = getSingleton(beanName, false);
 			if (earlySingletonReference != null) {
+			    //是否被代理类替代
 				if (exposedObject == bean) {
 					exposedObject = earlySingletonReference;
 				}
