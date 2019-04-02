@@ -517,6 +517,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			// BeanWrapperImpl,bean的包装类，bean详细的类信息 + Spring提供的格式处理工具，
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
@@ -554,14 +555,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			});
 		}
 
-		// Initialize the bean instance.
+		// Initialize the bean instance. 保存bean，用于下面的比较，处理过后是否还是原来的ben
+		//主要bean 被切面织入，是否代理
 		Object exposedObject = bean;
 		try {
-			//属性填充
+			//bean的属性装填
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
-				//是否可以转换为 proxy-bean
-				exposedObject = initializeBean(beanName, exposedObject, mbd);
+				//初始化bean，这个过程会将切面织入的bean替换成 代理类，proxy
+				//属性填充
+				populateBean(beanName, mbd, instanceWrapper);
+				if (exposedObject != null) {
+					//是否可以转换为 proxy-bean
+					exposedObject = initializeBean(beanName, exposedObject, mbd);
+				}
 			}
 		}
 		catch (Throwable ex) {
@@ -1217,7 +1224,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @param bw the BeanWrapper with bean instance
 	 */
-	protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw) {
+	protected void populateBean(String beanName,RootBeanDefinition mbd, BeanWrapper bw) {
 		PropertyValues pvs = mbd.getPropertyValues();
 
 		if (bw == null) {
