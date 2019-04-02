@@ -217,16 +217,15 @@ public abstract class AopUtils {
 	 */
 	public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(pc, "Pointcut must not be null");
-		if (!pc.getClassFilter().matches(targetClass)) {
+		if (!pc.getClassFilter().matches(targetClass)) { //匹配是否切到 目标class
 			return false;
 		}
-
-		MethodMatcher methodMatcher = pc.getMethodMatcher();
+		MethodMatcher methodMatcher = pc.getMethodMatcher();//是否 为全部方法匹配
 		if (methodMatcher == MethodMatcher.TRUE) {
 			// No need to iterate the methods if we're matching any method anyway...
 			return true;
 		}
-
+		// 以下就是按照配置文件的规则，逐一匹配，返回是否被切面切到
 		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
 		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
@@ -276,6 +275,7 @@ public abstract class AopUtils {
 		}
 		else if (advisor instanceof PointcutAdvisor) {
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;
+			// 只要class的任何一个方法被切到，就返回 true
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {
@@ -297,13 +297,16 @@ public abstract class AopUtils {
 			return candidateAdvisors;
 		}
 		List<Advisor> eligibleAdvisors = new LinkedList<Advisor>();
+		//引介切面 是类的增强器，
 		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
 			}
 		}
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
+		//遍历所有的切面管理器，目标类在作用域内，则添加到 增强器列表中，后续代理会逐一加强方法的功能，比如事务，日志等操作
 		for (Advisor candidate : candidateAdvisors) {
+
 			if (candidate instanceof IntroductionAdvisor) {
 				// already processed
 				continue;

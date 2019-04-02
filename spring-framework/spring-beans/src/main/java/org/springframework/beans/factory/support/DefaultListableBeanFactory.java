@@ -407,6 +407,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return resolvedBeanNames;
 	}
 
+	//根据class类型来查找BeanDefinition是否存在
 	private String[] doGetBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<String>();
 
@@ -416,6 +417,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// is not defined as alias for some other bean.
 			if (!isAlias(beanName)) {
 				try {
+					// 如果用父beanDefinition,则合并 beanDefinition
 					RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 					// Only check bean definition if it is complete.
 					if (!mbd.isAbstract() && (allowEagerInit ||

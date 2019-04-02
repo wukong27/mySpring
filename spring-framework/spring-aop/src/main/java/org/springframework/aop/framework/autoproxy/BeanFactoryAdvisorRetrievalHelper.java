@@ -68,10 +68,12 @@ public class BeanFactoryAdvisorRetrievalHelper {
 		if (advisorNames == null) {
 			// Do not initialize FactoryBeans here: We need to leave all regular beans
 			// uninitialized to let the auto-proxy creator apply to them!
+			//获取切面的增强器 beanDefinition 名称
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);
 			this.cachedAdvisorBeanNames = advisorNames;
 		}
+		//没有则返回
 		if (advisorNames.length == 0) {
 			return new ArrayList<Advisor>();
 		}

@@ -266,25 +266,25 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * </ul>
 	 */
 	public void overrideFrom(BeanDefinition other) {
-		if (StringUtils.hasLength(other.getBeanClassName())) {
+		if (StringUtils.hasLength(other.getBeanClassName())) {//beanClassName
 			setBeanClassName(other.getBeanClassName());
 		}
-		if (StringUtils.hasLength(other.getScope())) {
+		if (StringUtils.hasLength(other.getScope())) {//创建方式，作用域
 			setScope(other.getScope());
 		}
-		setAbstract(other.isAbstract());
-		setLazyInit(other.isLazyInit());
+		setAbstract(other.isAbstract());//是否为抽象类
+		setLazyInit(other.isLazyInit());//是否懒加载
 		if (StringUtils.hasLength(other.getFactoryBeanName())) {
-			setFactoryBeanName(other.getFactoryBeanName());
+			setFactoryBeanName(other.getFactoryBeanName());//factoryBean的名称
 		}
 		if (StringUtils.hasLength(other.getFactoryMethodName())) {
-			setFactoryMethodName(other.getFactoryMethodName());
+			setFactoryMethodName(other.getFactoryMethodName());// factoryBean的方法名
 		}
 		getConstructorArgumentValues().addArgumentValues(other.getConstructorArgumentValues());
-		getPropertyValues().addPropertyValues(other.getPropertyValues());
-		setRole(other.getRole());
-		setSource(other.getSource());
-		copyAttributesFrom(other);
+		getPropertyValues().addPropertyValues(other.getPropertyValues());//增加 属性值
+		setRole(other.getRole());//角色
+		setSource(other.getSource());//资源
+		copyAttributesFrom(other);//资源属性
 
 		if (other instanceof AbstractBeanDefinition) {
 			AbstractBeanDefinition otherAbd = (AbstractBeanDefinition) other;

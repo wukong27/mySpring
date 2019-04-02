@@ -1202,6 +1202,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 
 	/**
+	 *
+	 *
 	 * Return a merged RootBeanDefinition, traversing the parent bean definition
 	 * if the specified bean corresponds to a child bean definition.
 	 * @param beanName the name of the bean to retrieve the merged definition for
@@ -1233,6 +1235,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+     * 将父级beanDefinitino 和 child BeanDefinition 合并。这个设计在与，提供继承的属性，
+     * 在父BeanDefinition中设置过的， 子 beanDefinition可以直接使用，如果子
+     * beanDefinition有特殊设置的话，就覆盖父beanDefinition的设置
+     * 这样就会方便用户设置，重复利用属性设置
+     *
 	 * Return a RootBeanDefinition for the given bean, by merging with the
 	 * parent if the given bean's definition is a child bean definition.
 	 * @param beanName the name of the bean definition

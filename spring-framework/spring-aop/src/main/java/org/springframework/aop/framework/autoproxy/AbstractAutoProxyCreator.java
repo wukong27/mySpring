@@ -351,6 +351,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
         //如果在切面范围内，则创建proxy-bean
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		// DO_NOT_PROXY 为 	Object[] =null，估计只是为了类型保持一致，null其实用什么类型接受都一样
+		//如果没有找到增强器，则直接放回原来的bean实例，不做切面操作，不生产proxy-bean
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
 			Object proxy = createProxy(

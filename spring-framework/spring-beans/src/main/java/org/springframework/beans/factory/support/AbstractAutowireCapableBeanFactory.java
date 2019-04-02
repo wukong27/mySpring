@@ -1601,6 +1601,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 *  初始化给定的bean实例，应用工厂回调,需要生产代理的bean，在这个过程中，被替换为 proxy-bean
+     *  切面相关的bean是继承了 BeanPostProcessor接口的，在初始化bean所有用户的bean都可以被切到
+     *
 	 * Initialize the given bean instance, applying factory callbacks
 	 * as well as init methods and bean post processors.
 	 * <p>Called from {@link #createBean} for traditionally defined beans,
