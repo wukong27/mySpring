@@ -136,12 +136,15 @@ class ConstructorResolver {
 			ConstructorArgumentValues resolvedValues = null;
 
 			int minNrOfArgs;
+			// 参数的数量一定 大于等于 传入进来的值 的数量
 			if (explicitArgs != null) {
 				minNrOfArgs = explicitArgs.length;
 			}
 			else {
+				// 获取配置的构造器的参数值 数组
 				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
 				resolvedValues = new ConstructorArgumentValues();
+				// 将参数值 转化为 resolvedValues
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
@@ -164,6 +167,7 @@ class ConstructorResolver {
 			Set<Constructor<?>> ambiguousConstructors = null;
 			LinkedList<UnsatisfiedDependencyException> causes = null;
 
+			// 遍历所有的构造器，进行参数转化
 			for (Constructor<?> candidate : candidates) {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
 
@@ -172,11 +176,13 @@ class ConstructorResolver {
 					// do not look any further, there are only less greedy constructors left.
 					break;
 				}
+				// 参数个数小于配置的参数 数量的过滤掉
 				if (paramTypes.length < minNrOfArgs) {
 					continue;
 				}
 
 				ArgumentsHolder argsHolder;
+				// resolvedValues !=null 说明，传入的配置参数为null
 				if (resolvedValues != null) {
 					try {
 						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, paramTypes.length);
@@ -186,6 +192,9 @@ class ConstructorResolver {
 								paramNames = pnd.getParameterNames(candidate);
 							}
 						}
+						// 依赖对象缓存在 dependentBeanMap ， dependenciesForBeanMap 中
+						// resolvedValues 为配置的参数包装器，用来装载配置的参数
+						// 循环的创建所需要的参数 实例
 						argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, paramNames,
 								getUserDeclaredConstructor(candidate), autowiring);
 					}
@@ -202,6 +211,7 @@ class ConstructorResolver {
 						continue;
 					}
 				}
+				// 传入的 参数不为空，将 传入的参数 封装为 argsHolder
 				else {
 					// Explicit arguments given -> arguments length must match exactly.
 					if (paramTypes.length != explicitArgs.length) {
@@ -216,6 +226,7 @@ class ConstructorResolver {
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = candidate;
 					argsHolderToUse = argsHolder;
+					// 使用 出理过后的参数 来创建实例
 					argsToUse = argsHolder.arguments;
 					minTypeDiffWeight = typeDiffWeight;
 					ambiguousConstructors = null;
@@ -249,6 +260,7 @@ class ConstructorResolver {
 			}
 
 			if (explicitArgs == null) {
+				// 将引用对象参数缓存起来
 				argsHolderToUse.storeCache(mbd, constructorToUse);
 			}
 		}
@@ -268,6 +280,7 @@ class ConstructorResolver {
 				}, beanFactory.getAccessControlContext());
 			}
 			else {
+				//argsToUse，构造器参数，创建实例时传入的参数
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}

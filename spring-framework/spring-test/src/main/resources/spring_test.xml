@@ -42,7 +42,7 @@
     <aop:config>
         <!--问题权限切面检查-->
         <aop:aspect order="2" ref="permissionAspect">
-        <aop:around method="execute" pointcut="execution( * org.springframework.service.service.*(..) )"/>
+        <aop:around method="execute" pointcut="execution( * org.springframework.service.ServiceTest.*(..) )"/>
     </aop:aspect>
         <!--<aop:advisor advice-ref="permissionAspect" id="advisor"></aop:advisor>-->
     </aop:config>

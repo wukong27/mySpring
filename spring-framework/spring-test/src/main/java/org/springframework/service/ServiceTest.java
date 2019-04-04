@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
  * 2019/3/28 12:28
  */
 @Service
-public class service {
+public class ServiceTest {
 
     public void update(){
         System.out.println("update");

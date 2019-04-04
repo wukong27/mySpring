@@ -119,9 +119,11 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					}
 				});
 			}
+			// jdk
 			return BeanUtils.instantiateClass(ctor, args);
 		}
 		else {
+			// cglib
 			return instantiateWithMethodInjection(bd, beanName, owner, ctor, args);
 		}
 	}

@@ -550,7 +550,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
-				//实例化所有的(non-lazy-init)单利
+				//实例化所有的(non-lazy-init)单利.factoryBean调用就getObject来生产bean，非
+				//FactoryBean的bean，封装成ObjectFactory来生成bean，底层调用的是；
+				// spring的单例缓存中放置的是beanName对应的bean（FactoryBean）
+				//比如dubbo得reference 就是一个 FactoryBean
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
@@ -561,22 +564,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					logger.warn("Exception encountered during context initialization - " +
 							"cancelling refresh attempt: " + ex);
 				}
-
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
-
 				// Reset 'active' flag.
 				cancelRefresh(ex);
-
 				// Propagate exception to caller.
 				throw ex;
 			}
-
 			finally {
 				// Reset common introspection caches in Spring's core, since we
 				// might not ever need metadata for singleton beans anymore...
                 /**
-                 * 重置Spring核心中的常见内省缓存，
+                 * 重置Spring核心中的常见内置缓存，
                  * 从此我们开始可能再也不需要单例bean的元数据
                  */
 				resetCommonCaches();
@@ -734,14 +733,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initMessageSource() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		// messageSource 包含单例的话，检测属性是否设置
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
 				HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
+				// 父级消息源没有设置的，setParent
 				if (hms.getParentMessageSource() == null) {
 					// Only set parent context as parent MessageSource if no parent MessageSource
 					// registered already.
+					//如果没有父MessageSource，则仅将父上下文设置为父MessageSource
 					hms.setParentMessageSource(getInternalParentMessageSource());
 				}
 			}
@@ -749,11 +751,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.debug("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
+		//不包含消息源，创建
 		else {
 			// Use empty MessageSource to be able to accept getMessage .calls
 			DelegatingMessageSource dms = new DelegatingMessageSource();
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
+			//注册 messageSource 单例
 			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate MessageSource with name '" + MESSAGE_SOURCE_BEAN_NAME +
@@ -769,6 +773,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initApplicationEventMulticaster() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		// APPLICATION_EVENT_MULTICASTER_BEAN_NAME = applicationEventMulticaster
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -857,7 +862,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * initializing all remaining singleton beans.
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-		// Initialize conversion service for this context.
+		// 初始化此上下文的转换服务
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
 			beanFactory.setConversionService(
@@ -867,6 +872,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Register a default embedded value resolver if no bean post-processor
 		// (such as a PropertyPlaceholderConfigurer bean) registered any before:
 		// at this point, primarily for resolution in annotation attribute values.
+		// 检查并注册默认的value 解析器
 		if (!beanFactory.hasEmbeddedValueResolver()) {
 			beanFactory.addEmbeddedValueResolver(new StringValueResolver() {
 				@Override
@@ -877,18 +883,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
+		// LoadTimeWeaverAware 方式的切面，优先实例化，使用 tempClassLoader 做类加载
 		String[] weaverAwareNames = beanFactory.getBeanNamesForType(LoadTimeWeaverAware.class, false, false);
 		for (String weaverAwareName : weaverAwareNames) {
 			getBean(weaverAwareName);
 		}
-
 		// Stop using the temporary ClassLoader for type matching.
 		beanFactory.setTempClassLoader(null);
+		//清空LoadTimeWeaverAware 的类加载器
 
 		// Allow for caching all bean definition metadata, not expecting further changes.
+		// 冻结配置项，在使用 getBeanNamesForType时，如果已经冻结，则从缓存中查
+		// 否则，从 注册的beanDefinitions 中找
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		//加载所有的非懒加载 bean出来
 		beanFactory.preInstantiateSingletons();
 	}
 
