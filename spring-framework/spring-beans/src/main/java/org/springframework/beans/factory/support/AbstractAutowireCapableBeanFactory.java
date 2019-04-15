@@ -519,7 +519,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
-			// BeanWrapperImpl,bean的包装类，bean详细的类信息 + Spring提供的格式处理工具，
+			// BeanWrapperImpl , bean的包装类 , bean详细的类信息 + Spring提供的格式处理工具
+			// 创建实例 1.简单的午餐构造器，2.有参构造器，会处理参数,autowire 的时候，会调用getBean()生成需要的bean实例
+			// 构造器方式的循环引用，是无法解析的
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
@@ -539,13 +541,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				mbd.postProcessed = true;
 			}
 		}
-
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-        // 是否需要提早曝光：单例 & 允许循环依赖 & 当前bean正在创建中，检测循环依赖
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
-		// 如果当前正在创建的Bean的话，
+		/**
+		 *是否需要提早曝光：单例 & 允许循环依赖 & 当前bean正在创建中，检测循环依赖
+		 *AbstractBeanFactory#doGetBean()方法中：Object sharedInstance = getSingleton(beanName);
+		 *相对应。在单例还没有创建的时候，可以引用起来，后期填充属性，不影响bean的使用
+		 */
+		// 如果当前正在创建的Bean的话，先缓存一个ObjectFactory到beanFactory中
 		if (earlySingletonExposure) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Eagerly caching bean '" + beanName +
@@ -563,7 +568,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		//主要bean 被切面织入，是否代理
 		Object exposedObject = bean;
 		try {
-			//bean的属性装填
+			//bean的属性装填，这时候会用依赖注入的情况发生
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
 				//初始化bean，这个过程会将切面织入的bean替换成 代理类，proxy
@@ -1265,16 +1270,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return;
 		}
 
+		// 应用有其他的单例时的处理
 		if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME ||
 				mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 			MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
 
 			// Add property values based on autowire by name if applicable.
+			// by name,通过名称在beanFactory中查找bean
 			if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_NAME) {
 				autowireByName(beanName, mbd, bw, newPvs);
 			}
 
 			// Add property values based on autowire by type if applicable.
+			// by type,通过类型
 			if (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_BY_TYPE) {
 				autowireByType(beanName, mbd, bw, newPvs);
 			}
